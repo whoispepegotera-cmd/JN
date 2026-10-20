@@ -26,15 +26,11 @@ jobs:
       - name: Assemble final Gloamgear page
         run: |
           cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
-          mkdir -p assets/runtime
-          base64 --decode assets/runtime/mara_combat.b64 > assets/runtime/mara_combat.webp
-          base64 --decode assets/runtime/hound.b64 > assets/runtime/hound.webp
-          base64 --decode assets/runtime/boss.b64 > assets/runtime/boss.webp
           python - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('</body>', '<script src="./combat-fix.js?v=${{ github.sha }}"></script><script src="./combat_atlas_fix.js?v=${{ github.sha }}"></script></body>')
+          s=s.replace('</body>', '<script src="./combat_atlas_fix.js?v=${{ github.sha }}"></script></body>')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Configure Pages
