@@ -24,7 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Assemble final Gloamgear page
-        run: cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
+        run: |
+          cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('</body>', '<script src="./combat-fix.js?v=${{ github.sha }}"></script></body>')
+          p.write_text(s, encoding='utf-8')
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
