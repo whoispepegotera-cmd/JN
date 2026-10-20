@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Assemble final Gloamgear page
+        run: cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
