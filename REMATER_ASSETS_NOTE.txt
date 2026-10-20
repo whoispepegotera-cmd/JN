@@ -1,0 +1,1 @@
+GLOAMGEAR 2D Remaster assets are staged on branch gloamgear-2d-remaster. Visuals use Mara Vell, Framecutter, enemy and boss art derived from the production sheets created in this project.
