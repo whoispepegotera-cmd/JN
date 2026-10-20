@@ -1,4 +1,4 @@
-name: Deploy Gloamgear to GitHub Pages
+name: Deploy Gloamgear Dominion to GitHub Pages
 
 on:
   push:
@@ -23,24 +23,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Assemble combat edition
+      - name: Verify Dominion build
         run: |
-          cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
-          mkdir -p assets/runtime
-          base64 --decode assets/runtime/mara2.b64 > assets/runtime/mara_combat.webp
-          base64 --decode assets/runtime/hound2.b64 > assets/runtime/hound.webp
-          base64 --decode assets/runtime/boss2.b64 > assets/runtime/boss.webp
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          s=s.replace('</body>', '<script src="./combat-fix.js?v=${{ github.sha }}"></script></body>')
-          p.write_text(s, encoding='utf-8')
-          PY
-          test -s assets/runtime/mara_combat.webp
-          test -s assets/runtime/hound.webp
-          test -s assets/runtime/boss.webp
-          grep -q 'combat-fix.js' index.html
+          test -s index.html
+          test -s travian.css
+          test -s travian.js
+          grep -q 'travian.css' index.html
+          grep -q 'travian.js' index.html
+          grep -q 'village-scene' travian.css
+          grep -q 'function village' travian.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
