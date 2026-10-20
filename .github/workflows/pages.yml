@@ -26,6 +26,10 @@ jobs:
       - name: Assemble final Gloamgear page
         run: |
           cat build/final_part1.html build/final_part2.html build/final_part3.html build/final_part4.html > index.html
+          mkdir -p assets/runtime
+          base64 --decode assets/runtime/mara_combat.b64 > assets/runtime/mara_combat.webp
+          base64 --decode assets/runtime/hound.b64 > assets/runtime/hound.webp
+          base64 --decode assets/runtime/boss.b64 > assets/runtime/boss.webp
           python - <<'PY'
           from pathlib import Path
           p=Path('index.html')
