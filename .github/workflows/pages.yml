@@ -34,7 +34,7 @@ jobs:
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('</body>', '<script src="./combat-fix.js?v=${{ github.sha }}"></script></body>')
+          s=s.replace('</body>', '<script src="./combat-fix.js?v=${{ github.sha }}"></script><script src="./combat_atlas_fix.js?v=${{ github.sha }}"></script></body>')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Configure Pages
