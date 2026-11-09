@@ -111,7 +111,7 @@ function stats(){
  const asp=Math.min(5,1.15+ranks[1]*.02+ranks[5]*.035+power('Boots')*.0003+m[1]);
  const critDamage=Math.min(4,1.9+m[3]);
  const skillPower=1+ranks[3]*.065+power('Relic')*.001+m[2]+m[4]+m[5];
- return{atk,hp,crit,critDamage,asp,dps:atk*asp*(1+crit*(critDamage-1)),def:(7+s.level*1.4+power('Chest')*1.5+power('Helmet')*.7+ranks[0]*3)*(1+m[7]),loot:1+ranks[4]*.035+m[8],accuracy:Math.min(.995,.94+ranks[2]*.003+m[1]*.1),dodge:Math.min(.45,.06+ranks[5]*.008+m[11]*.5),penetration:power('Weapon')*.2+ranks[2]*2,resistance:Math.min(.75,ranks[0]*.012+power('Amulet')*.0002),regeneration:1+ranks[0]*.25+ranks[4]*.5+m[7]*8,lifeSteal:Math.min(.25,ranks[5]*.008+power('Ring')*.00005),cooldown:Math.min(.6,ranks[3]*.015+m[2]*.3),skillPower,summon:ranks[4],boss:1+m[10],offline:1+m[9],shield:power('Helmet')*2};
+ return{atk,hp,crit,critDamage,asp,dps:atk*asp*(1+crit*(critDamage-1)),def:(7+s.level*1.4+power('Chest')*1.5+power('Helmet')*.7+ranks[0]*3)*(1+m[7]),loot:1+ranks[4]*.035+m[8],accuracy:Math.min(.995,.94+ranks[2]*.003+m[1]*.1),dodge:Math.min(.45,.06+ranks[5]*.008+m[11]*.5),penetration:power('Weapon')*.2+ranks[2]*2,resistance:Math.min(.75,ranks[0]*.012+power('Amulet')*.0002),regeneration:1+ranks[0]*.25+ranks[4]*.5+m[7]*8,lifeSteal:Math.min(.25,ranks[5]*.008+power('Ring')*.00005),cooldown:Math.min(.6,ranks[3]*.015+m[2]*.3),skillPower,summon:ranks[4]+m[6]*10,boss:1+m[10],offline:1+m[9],shield:power('Helmet')*2};
 }
 function spawn(){
  const w=wi(),k=kind(),lst=EN[w];let name,idx;
