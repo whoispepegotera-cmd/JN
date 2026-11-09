@@ -1,0 +1,41 @@
+name: Verify Gloamgear browser edition
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'gloamgear/**'
+      - 'scripts/*gloamgear*'
+      - '.github/workflows/gloamgear-browser.yml'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      QA_MODULE_DIR: ${{ runner.temp }}/gloamgear-browser-tools
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate and prepare browser assets
+        run: node scripts/build-gloamgear-browser.mjs
+      - name: Unit and simulation regression tests
+        run: node scripts/test-gloamgear-core.mjs
+      - name: Install test browser on CI only
+        run: |
+          npm install --prefix "$QA_MODULE_DIR" --no-audit --no-fund playwright@1.64.1
+          "$QA_MODULE_DIR/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Combat, saves, boss, prestige and responsive browser tests
+        run: node scripts/test-gloamgear-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gloamgear-browser-evidence
+          path: qa-results

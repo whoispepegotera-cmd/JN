@@ -1,8 +1,14 @@
-name: Deploy Gloamgear Dominion to GitHub Pages
+name: Deploy Gloamgear and Dominion to GitHub Pages
 
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [closed]
+    paths:
+      - 'gloamgear/**'
+      - 'scripts/*gloamgear*'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,15 +18,22 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QA_MODULE_DIR: ${{ runner.temp }}/gloamgear-browser-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify Dominion build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify existing Dominion build
         run: |
           test -s index.html
           test -s travian.css
@@ -29,6 +42,21 @@ jobs:
           grep -q 'travian.js' index.html
           grep -q 'village-scene' travian.css
           grep -q 'function village' travian.js
+      - name: Build the independent Gloamgear browser route
+        run: node scripts/build-gloamgear-browser.mjs
+      - name: Verify combat and save regressions before publishing
+        run: node scripts/test-gloamgear-core.mjs
+      - name: Install CI browser
+        run: |
+          npm install --prefix "$QA_MODULE_DIR" --no-audit --no-fund playwright@1.64.1
+          "$QA_MODULE_DIR/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify the actual game in Chromium before deployment
+        run: node scripts/test-gloamgear-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gloamgear-production-evidence
+          path: qa-results
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
@@ -38,3 +66,5 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Published browser game URL
+        run: echo 'PUBLISHED_GAME_URL=${{ steps.deployment.outputs.page_url }}gloamgear/'
