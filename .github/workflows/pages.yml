@@ -24,6 +24,9 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QA_MODULE_DIR: ${{ runner.temp }}/gloamgear-browser-tools
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +46,17 @@ jobs:
         run: node scripts/build-gloamgear-browser.mjs
       - name: Verify combat and save regressions before publishing
         run: node scripts/test-gloamgear-core.mjs
+      - name: Install CI browser
+        run: |
+          npm install --prefix "$QA_MODULE_DIR" --no-audit --no-fund playwright@1.64.1
+          "$QA_MODULE_DIR/node_modules/.bin/playwright" install --with-deps chromium
+      - name: Verify the actual game in Chromium before deployment
+        run: node scripts/test-gloamgear-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gloamgear-production-evidence
+          path: qa-results
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
