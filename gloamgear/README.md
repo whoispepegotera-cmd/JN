@@ -1,5 +1,9 @@
 # GLOAMGEAR · edición de navegador
 
+Jugar: https://gloamgear-unending-reel.exoticpalm.chatgpt.site
+
+Alojado en Sites; no requiere instalación ni configuración por el jugador.
+
 Esta ruta publica el juego de combate en `/gloamgear/`; la raíz del repositorio conserva Dominion.
 Se parte de `build/final_part1.html` a `final_part4.html`, con correcciones de combate, equipo,
 talentos, maestrías, misiones, prestige, persistencia local, teclado y móvil.
@@ -11,8 +15,7 @@ instalar la PWA. Todos los archivos de juego y arte se sirven desde el mismo alo
 
 Esta edición guarda en el navegador y tiene copia local de recuperación. El tiempo offline es
 una estimación del reloj del dispositivo. No proporciona autenticación, cloud save autoritativo,
-compras reales, puntuaciones online ni recompensas competitivas. No sustituye el backend del
-monorepo anterior, actualmente inaccesible porque el executor de este chat no se puede adjuntar.
+compras reales, puntuaciones online ni recompensas competitivas. No incluye el backend del monorepo solicitado originalmente; ese código no está presente en este checkout.
 No se afirma que sea la entrega canónica completa solicitada originalmente.
 
 Los documentos MASTER_PRODUCTION_DOCUMENT.docx, VISUAL_PRODUCTION_BIBLE.pdf y
@@ -28,7 +31,7 @@ encuentre, sin recortar concept sheets. Si están incompletos, genera SVG provis
 
 GitHub Actions prepara los assets y ejecuta pruebas headless del core y Chromium: combate real,
 botín, equipo, nivel, talentos, jefe, prestige único, recarga, recuperación y cinco viewports.
-La publicación requiere esas verificaciones, conserva Dominion e imprime la URL de juego
-al terminar `Deploy Gloamgear and Dominion to GitHub Pages`.
+La ruta de GitHub Pages conserva Dominion. La entrega de navegador también se publica de forma
+independiente en Sites, sin requerir acciones del jugador.
 
 Los paquetes de Playwright se instalan en el runner de CI, no en el ordenador del jugador.

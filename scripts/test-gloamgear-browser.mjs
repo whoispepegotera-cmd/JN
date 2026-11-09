@@ -7,7 +7,7 @@ const {chromium}=await import(pathToFileURL(resolve(process.env.QA_MODULE_DIR,'n
 const root=resolve('.'),mime={'.html':'text/html;charset=utf-8','.js':'text/javascript;charset=utf-8','.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg','.svg':'image/svg+xml'};
 const server=createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');let path=resolve(root,'.'+decodeURIComponent(url.pathname));if(path!==root&&!path.startsWith(root+'/'))throw Error('Invalid path');if(url.pathname.endsWith('/'))path=resolve(path,'index.html');const bytes=await readFile(path);res.writeHead(200,{'content-type':mime[extname(path)]||'application/octet-stream'});res.end(bytes);}catch{res.writeHead(404);res.end('Not found');}});
 await new Promise(r=>server.listen(8080,'127.0.0.1',r));
-const browser=await chromium.launch({headless:true,args:['--no-sandbox']});await mkdir('qa-results',{recursive:true});
+const browser=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH||undefined,args:['--no-sandbox']});await mkdir('qa-results',{recursive:true});
 const KEY='gloamgear_browser_local_v1',origin='http://127.0.0.1:8080/gloamgear/';
 function fresh(){return {version:1,level:1,xp:0,gold:0,gleam:0,stage:1,high:1,runHigh:1,runBosses:0,hp:198,en:100,shield:0,effects:[],inv:[],eq:{},nodes:Array(120).fill(false),mastery:Array(12).fill(0),prestige:0,frag:0,ach:Array(100).fill(false),quests:Array(30).fill(false),auto:true,paused:false,autoSkills:true,stats:{kills:0,bosses:0,loot:0,deaths:0,crits:0,skills:0,offline:0},time:Date.now()};}
 let errors=[],failures=[],checks=[];
@@ -33,11 +33,11 @@ try{
  const layout=fresh();layout.paused=true;layout.gold=2000;await fixture(layout);
  for(const [width,height]of [[1920,1080],[1366,768],[768,1024],[390,844],[360,800]]){
   await page.setViewportSize({width,height});
-  for(const label of ['Inventario','Personaje','Árbol','Maestrías','Misiones','Logros','Codex','Prestigio']){await nav(label);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label+' overflow at '+width);await close();}
+  for(const label of ['Inventario','Personaje','Árbol','Maestrías','Misiones','Logros','Codex','Mapa','Estadísticas','Prestigio']){await nav(label);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),label+' overflow at '+width);await close();}
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Battle overflow');await page.screenshot({path:'qa-results/battle-'+width+'.png',fullPage:true});
  }
  checks.push('all panels across five viewports');
- await page.setViewportSize({width:480,height:380});const preview=await page.locator('.view').screenshot({type:'jpeg',quality:20});console.log('GLOAMGEAR_PREVIEW_JPEG='+preview.toString('base64'));
+ await page.setViewportSize({width:480,height:380});await page.locator('.view').screenshot({path:'qa-results/preview.jpg',type:'jpeg',quality:60});
  assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);
  const report={checks,uncaughtErrors:errors,httpFailures:failures,localOnly:true,canonical:false};
  await writeFile('qa-results/report.json',JSON.stringify(report,null,2));console.log('BROWSER_QA='+JSON.stringify(report));

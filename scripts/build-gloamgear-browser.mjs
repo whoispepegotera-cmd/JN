@@ -29,9 +29,16 @@ for(const kind of Object.keys(choices)){
  }
 }
 html=html.replace(/const ART=\{[^;]+\};/,'const ART='+JSON.stringify(art)+';');new vm.Script(html.match(/<script>([\s\S]*?)<\/script>/)[1]);
-for(const atlas of ['sprites','worlds']){
- const bytes=await readFile('assets/'+atlas+'.webp');if(!completeImage(bytes))throw Error('Incomplete supplied atlas: '+atlas);
+// The supplied atlas files are truncated. Generate independent, lightweight scenery
+// instead of shipping broken textures or presenting concept-sheet crops as final art.
+const palettes=[['#151c24','#926144','#e29a49'],['#181b34','#705449','#daaa65'],['#142c2b','#45574b','#9bb888'],['#29273b','#7d7272','#e1c5a3'],['#151f36','#424b6e','#8ec5e0'],['#171c3a','#5a527b','#b5a5dc'],['#29151f','#783c36','#e48c49'],['#163139','#4f7476','#a2d3cc'],['#1f2924','#66533e','#b1ae74'],['#1b2128','#5c5d60','#c4b78e'],['#283543','#777b91','#e0d4b1'],['#171e38','#4f536f','#a9abd6'],['#2b1724','#78404b','#d29872'],['#171d29','#45495b','#b1a181'],['#141326','#45405e','#bba1cc']];
+for(let i=0;i<15;i++){
+ const [sky,stone,glow]=palettes[i];
+ const buildings=Array.from({length:12},(_,j)=>{const x=j*110-30,h=100+((j*67+i*43)%230),y=540-h;return `<g><path d="M${x} 560V${y}h86v${560-y}Z" fill="${stone}"/><path d="m${x-5} ${y} 48-28 48 28" fill="#151722"/><path d="M${x+14} ${y+25}h16v25h-16zm35 0h16v25h-16zM${x+14} ${y+75}h16v25h-16zm35 0h16v25h-16z" fill="${glow}" opacity=".5"/></g>`;}).join('');
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="${sky}"/><stop offset="1" stop-color="${stone}"/></linearGradient><radialGradient id="halo"><stop stop-color="${glow}" stop-opacity=".35"/><stop offset="1" stop-color="${glow}" stop-opacity="0"/></radialGradient><linearGradient id="floor" x2="0" y2="1"><stop stop-color="#322b30"/><stop offset="1" stop-color="#070b12"/></linearGradient></defs><path fill="url(#sky)" d="M0 0h1280v720H0z"/><circle cx="850" cy="160" r="220" fill="url(#halo)"/><circle cx="850" cy="160" r="50" fill="${glow}" opacity=".35"/><g opacity=".4">${buildings}</g><path d="M0 535q300-40 640 0t640 0v185H0Z" fill="url(#floor)"/><g fill="none" stroke="${glow}" opacity=".15"><path d="M0 590h1280M0 630h1280M0 685h1280M640 540 150 720m490-180 490 180M640 540 420 720m220-180 220 180"/></g><g fill="#0a1018"><path d="M70 580V165h14v415zm0-415h150v11H70zm131 0v50h-7v-50zM1180 580V220h14v360zm0-360h-130v10h130zm-115 0v50h7v-50z"/></g><g fill="${glow}" opacity=".8"><path d="M184 208h28l8 45h-44zm865 54h28l8 45h-44z"/></g><g fill="none" stroke="${glow}" opacity=".2" stroke-width="5"><circle cx="380" cy="390" r="85"/><circle cx="380" cy="390" r="60"/><path d="M380 300v180m-90-90h180"/></g></svg>`;
+ await writeFile(resolve(root,'assets/world-'+(i+1)+'.svg'),svg);
 }
+provenance.backgrounds='15 procedural SVG scenes. Provisional, not canonical final art; supplied atlases are truncated.';
 await writeFile(resolve(root,'index.html'),html);
 await writeFile(resolve(root,'asset-provenance.json'),JSON.stringify({art,provenance,canonical:false},null,2));
 console.log('Prepared browser release:',JSON.stringify({art,provenance}));

@@ -1,0 +1,14 @@
+{
+  "art": {
+    "mara": "assets/mara.webp",
+    "hound": "assets/hound.webp",
+    "boss": "assets/boss.webp"
+  },
+  "provenance": {
+    "mara": "assets/runtime/mara2.b64",
+    "hound": "assets/runtime/hound2.b64",
+    "boss": "assets/runtime/boss2.b64",
+    "backgrounds": "15 procedural SVG scenes. Provisional, not canonical final art; supplied atlases are truncated."
+  },
+  "canonical": false
+}
