@@ -1,0 +1,11 @@
+{
+  "name": "GLOAMGEAR: The Unending Reel",
+  "short_name": "Gloamgear",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#09080b",
+  "theme_color": "#09080b",
+  "description": "Combate automático y progreso local, directamente en el navegador."
+}
