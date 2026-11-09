@@ -13,11 +13,11 @@ function fresh(){return {version:1,level:1,xp:0,gold:0,gleam:0,stage:1,high:1,ru
 let errors=[],failures=[],checks=[];
 const context=await browser.newContext({viewport:{width:1366,height:768},reducedMotion:'reduce'});
 context.on('page',page=>{page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)failures.push(r.url()+':'+r.status());});});
-const page=await context.newPage();const snapshot=()=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+const page=await context.newPage();await page.addInitScript(key=>{const pending=sessionStorage.getItem(key+'.qaSeed');if(pending!==null){localStorage.setItem(key,pending);sessionStorage.removeItem(key+'.qaSeed');}},KEY);const snapshot=()=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
 async function until(fn,description,ms=45000){const end=Date.now()+ms;while(Date.now()<end){if(await fn())return;await page.waitForTimeout(150);}throw Error('Timed out: '+description);}
 async function nav(label){await page.locator('[data-m="'+label+'"]:visible').first().click();await page.locator('.modal').waitFor();}
 async function close(){const button=page.locator('.close');if(await button.count())await button.click();}
-async function fixture(state){await page.evaluate(({key,state})=>localStorage.setItem(key,JSON.stringify(state)),{key:KEY,state});await page.reload();await page.locator('.app').waitFor();}
+async function seedNext(raw){await page.evaluate(({key,raw})=>sessionStorage.setItem(key+'.qaSeed',raw),{key:KEY,raw});}async function fixture(state){await seedNext(JSON.stringify(state));await page.reload();await page.locator('.app').waitFor();}
 try{
  await page.goto(origin);await page.locator('.app').waitFor();
  await until(()=>page.locator('.combat-art').evaluateAll(imgs=>imgs.length===2&&imgs.every(img=>img.complete&&img.naturalWidth>0)),'combat art');
@@ -26,8 +26,8 @@ try{
  await page.locator('#pause').click();await nav('Inventario');await page.locator('[data-equip]').first().click();let state=await snapshot();assert.equal(Object.keys(state.eq).length,1);checks.push('equip');await close();
  await nav('Árbol');await page.locator('[data-node="0"]').click();state=await snapshot();assert.equal(state.nodes[0],true);checks.push('talent');await close();
  const equipment=state.eq,gold=state.gold;await page.reload();assert.deepEqual((await snapshot()).eq,equipment);assert.equal((await snapshot()).gold,gold);checks.push('reload persistence');
- await page.evaluate(key=>localStorage.setItem(key,'{broken'),KEY);await page.reload();assert.equal(Object.keys((await snapshot()).eq).length,1);checks.push('backup recovery');
- const boss=fresh();Object.assign(boss,{stage:50,high:50,runHigh:50,level:50,hp:5000,auto:false,autoSkills:false});await fixture(boss);await page.getByRole('button',{name:'Última vuelta',exact:true}).click();await until(async()=>(await snapshot()).stats.bosses>=1,'real boss defeat');assert.equal((await snapshot()).stage,51);checks.push('boss');
+ await seedNext('{broken');await page.reload();assert.equal(Object.keys((await snapshot()).eq).length,1);checks.push('backup recovery');
+ const boss=fresh();Object.assign(boss,{stage:50,high:50,runHigh:50,level:50,hp:5000,auto:false,autoSkills:false});await fixture(boss);await page.getByRole('button',{name:'Última vuelta',exact:true}).click();await until(async()=>{if((await snapshot()).stats.bosses>=1)return true;for(const name of ['Framecutter','Ignición','Escarcha','Última vuelta'])await page.getByRole('button',{name,exact:true}).click();return (await snapshot()).stats.bosses>=1;},'real boss defeat');assert.equal((await snapshot()).stage,51);checks.push('boss');
  const prestige=fresh();Object.assign(prestige,{stage:150,high:150,runHigh:150,runBosses:3,level:50,paused:true});await fixture(prestige);await nav('Prestigio');await page.locator('#prestige').click();assert.equal((await snapshot()).prestige,1);const fragments=(await snapshot()).frag;await nav('Prestigio');assert.ok(await page.locator('#prestige').isDisabled());assert.equal((await snapshot()).frag,fragments);await close();checks.push('prestige one-time reward');
  const offline=fresh();offline.time=Date.now()-60000;await fixture(offline);await page.locator('#pause').click();const offlineGold=(await snapshot()).gold;assert.ok(offlineGold>0);await page.reload();assert.equal((await snapshot()).gold,offlineGold);checks.push('local offline persistence');
  const layout=fresh();layout.paused=true;layout.gold=2000;await fixture(layout);
